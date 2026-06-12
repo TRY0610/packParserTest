@@ -59,8 +59,9 @@ class MarkdownParser(BaseParser):
 	# ---------------------------------------------
 	def parse_meta(self):
 		tok = self.consume("META")
+		key, value = tok.value.split(":")
 		# METAは丸ごとテキストで保持
-		return MetaNode(tok.value)
+		return MetaNode(key, value)
 
 	# ---------------------------------------------
 	# 見出しノード

@@ -42,7 +42,7 @@ class MetaNode(Node):
         self.key = key
         self.value = value
     def __repr__(self):
-        return f"{self.__class__.__name__}({self.key}: {self.value})"
+        return f"{self.__class__.__name__}(key:{self.key}, value:{self.value})"
 
 class TableNode(Node):
     def __init__(self, rows):

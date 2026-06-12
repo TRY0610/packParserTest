@@ -1,6 +1,6 @@
 import html
 
-class RendererHTML:
+class RendererMarkdown:
 	# 連打リング開始
 	def render(self, node):
 		method_name = f"render_{node.__class__.__name__}"
@@ -18,11 +18,11 @@ class RendererHTML:
 	
 	def render_ParagraphNode(self, node):
 		inner = "".join(self.render(child) for child in node.children)
-		return f"<p>{inner}</p>\n"
+		return f"{inner}\n"
 	
 	def render_MetaNode(self, node):
 		#メタ情報はHTMLには出力しない(隠し情報として今後出力させるかも？)
-		return f""
+		return f"--{node.key}:{node.value}\n"
 	
 	def render_TextNode(self, node):
 		return self.escape_html(node.text)
@@ -32,40 +32,27 @@ class RendererHTML:
 	
 	def render_BoldNode(self, node):
 		inner = "".join(self.render(child) for child in node.children)
-		return f"<strong>{inner}</strong>"
+		return f"**{inner}**"
 	
 	def render_ItalicNode(self, node):
 		inner = "".join(self.render(child) for child in node.children)
-		return f"<em>{inner}</em>"
+		return f"__{inner}__"
 	
 	def render_LinkNode(self, node):
 		inner = "".join(self.render(child) for child in node.children)
 		
 		if node.url:
-			return f'<a href="{self.escape_html(node.url)}">{inner}</a>'
+			return f'[{inner}]({node.url})'
 		else:
 			# サイト内リンク or 未解決リンク想定
-			return f'<a href="#">(未作成){inner}</a>'
+			return f'[{inner}]'
 	
 	def render_HeadingNode(self, node):
 		inner = "".join(self.render(child) for child in node.children)
-		return f"<h{node.level}>{inner}</h{node.level}>\n"
+		return f"{'#' * node.level}{inner}\n"
 	
 	def render_TableNode(self, node):
-		lines = node.rows.splitlines()
-	
-		rows = []
-		for line in lines:
-			if line.startswith("|"):
-				cells = [c for c in line.split("|")[1:-1]]
-				rows.append(cells)
-	
-		html = ["<table>"]
-		for row in rows:
-			html.append("<tr>")
-			for cell in row:
-				html.append(f"<td>{self.escape_html(cell)}</td>")
-			html.append("</tr>")
-		html.append("</table>\n")
-	
-		return "".join(html)
+		text=[]
+		text.append(f"{node.rows}")
+		
+		return "".join(text)

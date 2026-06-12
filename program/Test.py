@@ -1,6 +1,8 @@
 import clsMain_html
 
-text = '''こんにちは
+text = '''
+--user:あああ
+こんにちは
 \\table
 |A|B|
 |C|D|
