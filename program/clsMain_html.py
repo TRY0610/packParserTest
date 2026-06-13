@@ -1,6 +1,6 @@
 #from packParser import clsTest 
 #from packParser import clsFileManager
-import packParser
+import packParser.markdown as packParser
 
 class clsMain:
 	def __init__(self):

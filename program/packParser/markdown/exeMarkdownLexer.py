@@ -1,4 +1,4 @@
-from .baseclsLexer import BaseLexer
+from ..core.baseclsLexer import BaseLexer
 
 def executeMarkdownLexer(arg_text):
 	# 字句の基点となる正規表現一覧

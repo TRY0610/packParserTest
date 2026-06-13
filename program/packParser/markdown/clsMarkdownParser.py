@@ -1,8 +1,8 @@
 import re
 import inspect
-from .clsBaseParser import BaseParser
+from ..core.clsBaseParser import BaseParser
 
-from .clsASTNode import (
+from .clsASTNodeMarkdown import (
 	DocumentNode,
 	HeadingNode,
 	MetaNode,
