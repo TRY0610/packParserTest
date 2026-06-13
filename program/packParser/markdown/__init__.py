@@ -1,7 +1,7 @@
 # packParser/markdown/__init__.py
 
 # ① 内部のファイル（LexerやParser）を読み込む
-from .exeMarkdownLexer import executeMarkdownLexer
+from .clsMarkdownLexer import executeMarkdownLexer
 from .clsMarkdownParser import MarkdownParser
 from .clsRendererHTML import RendererHTML
 from .clsRendererMarkdown import RendererMarkdown
