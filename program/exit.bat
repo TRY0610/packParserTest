@@ -1,2 +1,2 @@
-python Test.py
+python Test_markdown.py
 pause
