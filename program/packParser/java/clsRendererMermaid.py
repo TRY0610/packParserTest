@@ -181,3 +181,28 @@ class RendererMermaid:
             has_connected_first = True
                 
         return active_parent_ids
+    
+    def render_LoopNode(self, node):
+        """FOR/WHILE ループ文（ひし形と逆向き矢印）の描画"""
+        self.node_count += 1
+        loop_id = f"node{self.node_count}"
+        
+        # 表示用テキスト (例: "while (i < 10)" や "for (int i=0...)" )
+        prefix = "for" if node.loop_type == "FOR" else "while"
+        safe_condition = f"{prefix} ({node.conditions})".replace('"', "'").strip()
+        
+        # ループ判定ノード（ひし形）の配置
+        self.lines.append(f'        {loop_id}{{"{safe_condition}"}}')
+        
+        if node.children:
+            # ループ内処理の描画（条件ノードから "Yes" で入る）
+            loop_ends = self.render_statements(node.children, [loop_id], branch_label="-->|Yes|")
+            
+            # ループ内処理のすべての末尾から、再び条件判定ノードへ矢印を戻す
+            for e_id in loop_ends:
+                self.lines.append(f'        {e_id} --> {loop_id}')
+                
+        # 呼び出し元(render_statements)には、
+        # 「このループ自体の侵入口(loop_id)」と「ループ終了後に次に進むポイント([loop_id])」を返す
+        # ※ ループ条件が False (No) の時にループを抜けるため、次の親ノードは loop_id 自身になる
+        return (loop_id, [loop_id])

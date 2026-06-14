@@ -7,7 +7,8 @@ from .clsASTNodeJava import (
     FunctionNode,
     IfNode,
     CommentNode,
-    StatementNode,  # 追加
+    StatementNode,
+    LoopNode,
 )
 
 class JavaParser(BaseParser):
@@ -72,6 +73,9 @@ class JavaParser(BaseParser):
     # ブロック内部要素の解析分岐
     # ---------------------------------------------
     def parse_function_block(self):
+        if self.at("FOR") or self.at("WHILE"):
+            return self.parse_loop()
+        
         if self.at("IF"):
             return self.parse_if()
             
@@ -85,7 +89,46 @@ class JavaParser(BaseParser):
         # Java解析器の責任として、「StatementNode（処理文ノード）」として正しくパースする
         stmt_token = self.consume()
         return StatementNode(stmt_token.value)
-
+    
+    # ---------------------------------------------
+    # FOR / WHILE ループ解析
+    # ---------------------------------------------
+    def parse_loop(self):
+        # FOR か WHILE かを保持
+        loop_type = "FOR" if self.at("FOR") else "WHILE"
+        self.consume() # トークンを消費
+        
+        # 条件式の始まり ( までスキップ
+        while not self.eof() and not self.at("PAREN_OPEN"):
+            self.consume()
+            
+        condition_tokens = []
+        self.consume("PAREN_OPEN")
+        paren_depth = 1
+        
+        # 括弧のネストを考慮して条件式を抽出
+        while not self.eof() and paren_depth > 0:
+            if self.at("PAREN_OPEN"):
+                paren_depth += 1
+            elif self.at("PAREN_CLOSE"):
+                paren_depth -= 1
+                if paren_depth == 0:
+                    self.consume("PAREN_CLOSE")
+                    break
+            condition_tokens.append(self.consume().value)
+            
+        condition_text = "".join(condition_tokens)
+        
+        # ブロックの始まり { までスキップ
+        while not self.eof() and not self.at("BRACES_OPEN"):
+            self.consume()
+            
+        self.consume("BRACES_OPEN")
+        children = self.parse_statements("BRACES_CLOSE")
+        self.consume("BRACES_CLOSE")
+        
+        return LoopNode(loop_type, condition_text.strip(), children)
+    
     # ---------------------------------------------
     # IF解析
     # ---------------------------------------------

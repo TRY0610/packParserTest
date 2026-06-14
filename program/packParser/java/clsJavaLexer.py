@@ -16,6 +16,14 @@ def executeJavaLexer(arg_text):
 		# キーワード
 		# ---------------------------------------------
 		{
+			"type": "FOR",			 # for
+			"regex": r"for\b",
+		},
+		{
+			"type": "WHILE",		 # while
+			"regex": r"while\b",
+		},
+		{
 			"type": "IF",			 # if
 			"regex": r"if\b",
 		},
