@@ -28,3 +28,9 @@ class CommentNode(Node):
         self.text = text
     def __repr__(self):
         return f"{self.__class__.__name__}({self.text})"
+        
+class StatementNode(Node):
+    def __init__(self, children):
+        self.children = children
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.children})"
