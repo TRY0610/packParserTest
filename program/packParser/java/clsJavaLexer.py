@@ -17,11 +17,11 @@ def executeJavaLexer(arg_text):
 		# ---------------------------------------------
 		{
 			"type": "IF",			 # if
-			"regex": r"if",
+			"regex": r"if\b",
 		},
 		{
 			"type": "ELSE",			 # else
-			"regex": r"else",
+			"regex": r"else\b",
 		},
 		{
 			"type": "COMMENT",			 # コメント

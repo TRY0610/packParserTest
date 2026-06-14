@@ -24,7 +24,7 @@ class IfNode(Node):
         return f"{self.__class__.__name__}(true = {self.trueChildren}, false = {self.falseChildren})"
 
 class CommentNode(Node):
-    def __init__(self, children):
-        self.children = children
+    def __init__(self, text):
+        self.text = text
     def __repr__(self):
-        return f"{self.__class__.__name__}({self.children})"
+        return f"{self.__class__.__name__}({self.text})"
