@@ -21,14 +21,14 @@ class clsMain:
 		print("字句解析------------------------")
 		print("--------------------------------")
 		tokens = packParser.executeJavaLexer(arg_text)
-		print(tokens)
+		#print(tokens)
 		
 		
 		print("構文解析------------------------")
 		print("--------------------------------")
 		parser = packParser.JavaParser(tokens)
 		ast = parser.parse()
-		print(ast)
+		#print(ast)
 		
 		
 		print("Mermaid作成------------------------")
