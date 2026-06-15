@@ -108,7 +108,7 @@ def executeJavaLexer(arg_text):
 		},
 		{
 			"type": "TEXT",					  # どの記号にもマッチしないテキスト
-			"regex": r"[^ \t\n\[\]\(\)\*_\\|]+",
+			"regex": r"[^ \t\n\[\]\(\)\*_\\|:]+",
 		},
 		{
 			"type": "SYMBOL",					# 最後の砦（1文字）

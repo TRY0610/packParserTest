@@ -91,14 +91,7 @@ class RendererMermaid:
         return None
 
     def render_StatementNode(self, node):
-        if not node.children:
-            return None
-
-        self.node_count += 1
-        node_id = f"node{self.node_count}"
-        safe_text = str(node.children).replace('"', "'").replace("\n", "<br>")
-        self.lines.append(f'        {node_id}["{safe_text}"]')
-        return [node_id]
+        return None
 
     def render_IfNode(self, node):
         """IF文（ひし形）の描画と、True/Falseの条件分岐追跡"""
@@ -201,6 +194,7 @@ class RendererMermaid:
         """
         active_parent_ids = list(incoming_ids)
         has_connected_first = False
+        pending_outgoing_label = None
 
         for statement in statements:
             result = self.render_node(statement)
@@ -212,12 +206,17 @@ class RendererMermaid:
                 current_node_id = result[0]
                 next_parent_ids = result[1]
                 current_ids = [current_node_id]
+                pending_outgoing_label = result[2] if len(result) >= 3 else None
             else:
                 current_ids = result
                 next_parent_ids = result
 
             if active_parent_ids:
-                label = branch_label if not has_connected_first else "-->"
+                if pending_outgoing_label is not None and not has_connected_first:
+                    label = pending_outgoing_label
+                    pending_outgoing_label = None
+                else:
+                    label = branch_label if not has_connected_first else "-->"
                 for p_id in active_parent_ids:
                     for c_id in current_ids:
                         self.lines.append(f'        {p_id} {label} {c_id}')
@@ -246,4 +245,4 @@ class RendererMermaid:
             for e_id in loop_ends:
                 self.lines.append(f'        {e_id} --> {loop_id}')
 
-        return (loop_id, [loop_id])
+        return (loop_id, [loop_id], "-->|No|")

@@ -23,7 +23,6 @@ class JavaParser(BaseParser):
     # ---------------------------------------------
     def parse(self):
         nodes = []
-        print("--- Java解析開始 ---")
         while not self.eof():
             if self.at("NEWLINE") or self.at("SPACE"):
                 self.consume()
@@ -39,7 +38,6 @@ class JavaParser(BaseParser):
             else:
                 self.consume()
 
-        print("--- Java解析終了 ---")
         return ClassNode(nodes)
 
     # ---------------------------------------------
@@ -137,19 +135,16 @@ class JavaParser(BaseParser):
     # FOR / WHILE ループ解析
     # ---------------------------------------------
     def parse_loop(self):
-        # FOR か WHILE かを保持
         loop_type = "FOR" if self.at("FOR") else "WHILE"
-        self.consume() # トークンを消費
-        
-        # 条件式の始まり ( までスキップ
+        self.consume()
+
         while not self.eof() and not self.at("PAREN_OPEN"):
             self.consume()
-            
+
         condition_tokens = []
         self.consume("PAREN_OPEN")
         paren_depth = 1
-        
-        # 括弧のネストを考慮して条件式を抽出
+
         while not self.eof() and paren_depth > 0:
             if self.at("PAREN_OPEN"):
                 paren_depth += 1
@@ -159,32 +154,35 @@ class JavaParser(BaseParser):
                     self.consume("PAREN_CLOSE")
                     break
             condition_tokens.append(self.consume().value)
-            
+
         condition_text = "".join(condition_tokens)
-        
-        # ブロックの始まり { までスキップ
-        while not self.eof() and not self.at("BRACES_OPEN"):
+
+        while not self.eof() and (self.at("NEWLINE") or self.at("SPACE")):
             self.consume()
-            
-        self.consume("BRACES_OPEN")
-        children = self.parse_statements("BRACES_CLOSE")
-        self.consume("BRACES_CLOSE")
-        
+
+        if self.at("BRACES_OPEN"):
+            self.consume("BRACES_OPEN")
+            children = self.parse_statements("BRACES_CLOSE")
+            self.consume("BRACES_CLOSE")
+        else:
+            stmt = self.parse_function_block()
+            children = [stmt] if stmt else []
+
         return LoopNode(loop_type, condition_text.strip(), children)
 
     # ---------------------------------------------
     # IF解析
     # ---------------------------------------------
-    def parse_if(self):
+    def parse_if(self, label=None):
         self.consume("IF")
-        
+
         while not self.eof() and not self.at("PAREN_OPEN"):
             self.consume()
-            
+
         condition_tokens = []
         self.consume("PAREN_OPEN")
         paren_depth = 1
-        
+
         while not self.eof() and paren_depth > 0:
             if self.at("PAREN_OPEN"):
                 paren_depth += 1
@@ -194,37 +192,73 @@ class JavaParser(BaseParser):
                     self.consume("PAREN_CLOSE")
                     break
             condition_tokens.append(self.consume().value)
-            
+
         condition_text = "".join(condition_tokens)
-        
-        while not self.eof() and not self.at("BRACES_OPEN"):
-            self.consume()
-            
-        self.consume("BRACES_OPEN")
-        true_children = self.parse_statements("BRACES_CLOSE")
-        self.consume("BRACES_CLOSE")
-        
-        false_children = None
-        
+
         while not self.eof() and (self.at("NEWLINE") or self.at("SPACE")):
             self.consume()
-            
+
+        if self.at("BRACES_OPEN"):
+            self.consume("BRACES_OPEN")
+            true_children = self.parse_statements("BRACES_CLOSE")
+            self.consume("BRACES_CLOSE")
+        else:
+            stmt = self.parse_function_block()
+            true_children = [stmt] if stmt else []
+
+        false_children = None
+        pending_false_label = None
+
+        while not self.eof():
+            if self.at("NEWLINE") or self.at("SPACE"):
+                self.consume()
+                continue
+
+            if self.at("COMMENT"):
+                comment = self.parse_comment()
+                if isinstance(comment, LabelNode):
+                    pending_false_label = comment.text
+                else:
+                    true_children.append(comment)
+                continue
+
+            if self.at("COMMENT_MULTI_LINE_OPEN"):
+                comment = self.parse_multi_comment()
+                if isinstance(comment, LabelNode):
+                    pending_false_label = comment.text
+                else:
+                    true_children.append(comment)
+                continue
+
+            break
+
         if self.at("ELSE"):
             self.consume("ELSE")
-            
+
             while not self.eof() and (self.at("NEWLINE") or self.at("SPACE")):
                 self.consume()
-                
+
             if self.at("IF"):
-                # else if の場合はネストされたIfNodeとして解析
-                false_children = [self.parse_if()]
+                nested_if = self.parse_if(label=pending_false_label)
+                false_children = [nested_if]
+            elif self.at("BRACES_OPEN"):
+                self.consume("BRACES_OPEN")
+                false_children = self.parse_statements("BRACES_CLOSE")
+                self.consume("BRACES_CLOSE")
+                if pending_false_label and false_children:
+                    first = false_children[0]
+                    if hasattr(first, 'label'):
+                        first.label = pending_false_label
             else:
-                if self.at("BRACES_OPEN"):
-                    self.consume("BRACES_OPEN")
-                    false_children = self.parse_statements("BRACES_CLOSE")
-                    self.consume("BRACES_CLOSE")
-                    
-        return IfNode(condition_text.strip(), true_children, false_children)
+                stmt = self.parse_function_block()
+                false_children = [stmt] if stmt else []
+                if pending_false_label and false_children and hasattr(false_children[0], 'label'):
+                    false_children[0].label = pending_false_label
+
+        node = IfNode(condition_text.strip(), true_children, false_children)
+        if label:
+            node.label = label
+        return node
 
     # ---------------------------------------------
     # SWITCH解析
