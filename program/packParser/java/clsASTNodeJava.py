@@ -1,27 +1,55 @@
 from ..core.clsASTNode import Node
 
 class ClassNode(Node):
-    def __init__(self, children):
+    def __init__(self, children, name=""):
+        self.name = name
         self.children = children
+
     def __repr__(self):
-        return f"{self.__class__.__name__}({self.children})"
+        return f"{self.__class__.__name__}(name={self.name}, children={self.children})"
 
 class FunctionNode(Node):
     def __init__(self, name, children):
         self.name = name
         self.children = children
+
     def __repr__(self):
-        return f"{self.__class__.__name__}({self.children})"
+        return f"{self.__class__.__name__}(name={self.name}, children={self.children})"
 
 class IfNode(Node):
-    def __init__(self, conditions, trueChildren, falseChildren = None, label = "", branchLabel = ""):
+    def __init__(self, conditions, trueChildren, falseChildren=None, label=None):
         self.conditions = conditions
         self.trueChildren = trueChildren
         self.falseChildren = falseChildren
         self.label = label
-        self.branchLabel = branchLabel
+
     def __repr__(self):
-        return f"{self.__class__.__name__}(true = {self.trueChildren}, false = {self.falseChildren})"
+        return f"{self.__class__.__name__}(label={self.label}, true={self.trueChildren}, false={self.falseChildren})"
+
+class SwitchNode(Node):
+    def __init__(self, condition, cases, defaultCase=None, label=None):
+        self.condition = condition
+        self.cases = cases
+        self.defaultCase = defaultCase
+        self.label = label
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}(label={self.label}, condition={self.condition}, cases={self.cases}, default={self.defaultCase})"
+
+class CaseNode(Node):
+    def __init__(self, label, children):
+        self.label = label
+        self.children = children
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}(label={self.label}, children={self.children})"
+
+class LabelNode(Node):
+    def __init__(self, text):
+        self.text = text
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.text})"
 
 class CommentNode(Node):
     def __init__(self, text):

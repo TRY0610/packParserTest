@@ -16,23 +16,39 @@ def executeJavaLexer(arg_text):
 		# キーワード
 		# ---------------------------------------------
 		{
-			"type": "FOR",			 # for
+			"type": "CLASS",            # class
+			"regex": r"class\b",
+		},
+		{
+			"type": "SWITCH",           # switch
+			"regex": r"switch\b",
+		},
+		{
+			"type": "CASE",             # case
+			"regex": r"case\b",
+		},
+		{
+			"type": "DEFAULT",          # default
+			"regex": r"default\b",
+		},
+		{
+			"type": "FOR",              # for
 			"regex": r"for\b",
 		},
 		{
-			"type": "WHILE",		 # while
+			"type": "WHILE",            # while
 			"regex": r"while\b",
 		},
 		{
-			"type": "IF",			 # if
+			"type": "IF",               # if
 			"regex": r"if\b",
 		},
 		{
-			"type": "ELSE",			 # else
+			"type": "ELSE",             # else
 			"regex": r"else\b",
 		},
 		{
-			"type": "COMMENT",			 # コメント
+			"type": "COMMENT",          # コメント
 			"regex": r"//",
 		},
 		{
@@ -74,8 +90,12 @@ def executeJavaLexer(arg_text):
 		# その他
 		# ---------------------------------------------
 		{
-			"type": "COLON",
+			"type": "SEMICOLON",
 			"regex": r";",
+		},
+		{
+			"type": "COLON",
+			"regex": r":",
 		},
 		{
 			"type": "NEWLINE",
